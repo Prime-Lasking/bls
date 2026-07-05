@@ -3,7 +3,7 @@
 version = 4
 
 [[package]]
-name = "bls"
+name = "bls-cli"
 version = "0.1.0"
 dependencies = [
  "colored",

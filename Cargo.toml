@@ -1,5 +1,5 @@
 [package]
-name = "bls"
+name = "bls-cli"
 version = "0.1.0"
 edition = "2024"
 authors = ["Prime-Lasking <limosbestert@gmail.com>"]
@@ -9,7 +9,7 @@ repository = "https://github.com/Prime-Lasking/bls"
 readme = "README.md"
 
 [[bin]]
-name = "bls"
+name = "bls-cli"
 path = "src/main.rs"
 
 [dependencies]
