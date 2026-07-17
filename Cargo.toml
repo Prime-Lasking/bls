@@ -1,17 +1,13 @@
 [package]
-name = "bls-cli"
-version = "0.1.1"
-edition = "2024"
-authors = ["Prime-Lasking <limosbestert@gmail.com>"]
-description = "A modern, better replacement for ls written in Rust with colored output"
-license = "MIT"
-repository = "https://github.com/Prime-Lasking/bls"
-readme = "README.md"
+name = "bls"
+version = "0.1.0"
+edition = "2021"
 
 [[bin]]
 name = "bls-cli"
 path = "src/main.rs"
 
 [dependencies]
-walkdir = "2.5.0"
+clap = { version = "4.6.2", features = ["derive"] }
 colored = "2"
+chrono = "0.4"

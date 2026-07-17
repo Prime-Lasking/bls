@@ -1,39 +1,75 @@
-use colored::*;
+use chrono::{DateTime, Local};
+use clap::Parser;
+use colored::Colorize;
 use std::fs;
 use std::io;
-use walkdir::WalkDir;
+use std::path::Path;
 
-fn find_length(path: &str) -> io::Result<u64> {
-    let metadata = fs::metadata(path)?;
-    Ok(metadata.len())
+fn get_last_modified(path: &Path) -> String {
+    fs::metadata(path)
+        .and_then(|m| m.modified())
+        .map(|t| {
+            let dt: DateTime<Local> = t.into();
+            format!("{}", dt.format("%Y-%m-%d %H:%M"))
+        })
+        .unwrap_or_else(|_| "???".to_string())
 }
 
-fn main() {
-    println!("{}", "Length Name".green());
-    for entry in WalkDir::new(".") {
-        let entry = entry.unwrap();
+#[derive(Parser)]
+#[command(name = "bls", about = "A better ls")]
+struct Args {
+    /// Directory to list
+    path: Option<String>,
 
-        // Skip the root directory "."
-        if entry.file_name() == "." {
-            continue;
-        }
+    /// Show hidden files
+    #[arg(short, long)]
+    all: bool,
+}
 
-        // Only show items in the current directory (depth 1)
-        if entry.depth() > 1 {
-            continue;
-        }
+fn main() -> io::Result<()> {
+    let args = Args::parse();
+    let path = args.path.as_deref().unwrap_or(".");
+    println!(
+        "{:>20} {:>10}   {}",
+        "LastWriteTime".green(),
+        "Length".green(),
+        "Name".green()
+    );
 
-        if entry.path().is_dir() {
-            println!(
-                "{:>10} {}",
-                "-",
-                entry.file_name().display().to_string().blue()
-            );
-        } else if entry.path().is_file() {
-            match find_length(entry.path().to_str().unwrap()) {
-                Ok(len) => println!("{:>10} {}", len, entry.file_name().display()),
-                Err(e) => eprintln!("Error reading {}: {}", entry.path().display(), e),
+    // first: directories
+    for entry in fs::read_dir(&path)? {
+        let entry = entry?;
+        let metadata = entry.metadata()?;
+        if metadata.is_dir() {
+            if entry.file_name().to_string_lossy().starts_with('.') && !args.all {
+                continue;
+            } else {
+                println!(
+                    "{:>20} {:>10}   {}",
+                    get_last_modified(&entry.path()).blue(),
+                    "-".blue(),
+                    entry.file_name().to_string_lossy().blue()
+                );
             }
         }
     }
+
+    // then: files
+    for entry in fs::read_dir(&path)? {
+        let entry = entry?;
+        let metadata = entry.metadata()?;
+        if metadata.is_file() {
+            if entry.file_name().to_string_lossy().starts_with('.') && !args.all {
+                continue;
+            } else {
+                println!(
+                    "{:>20} {:>10}   {}",
+                    get_last_modified(&entry.path()),
+                    metadata.len(),
+                    entry.file_name().to_string_lossy()
+                );
+            }
+        }
+    }
+    Ok(())
 }
