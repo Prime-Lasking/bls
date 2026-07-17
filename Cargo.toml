@@ -1,10 +1,10 @@
 [package]
 name = "bls"
-version = "0.1.0"
+version = "0.1.2"
 edition = "2021"
 
 [[bin]]
-name = "bls-cli"
+name = "bls"
 path = "src/main.rs"
 
 [dependencies]
